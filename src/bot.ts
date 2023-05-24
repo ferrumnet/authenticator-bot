@@ -30,6 +30,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send('Hello from Ferrum Authenticator!');
+  });
+
 app.post('/authenticate', async (req, res) => {
     const { code, userAddress } = req.body;
 
