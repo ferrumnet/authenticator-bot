@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/bot.ts",
+    "start": "node dist/bot.js",
     "build": "tsc"
-  },
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
