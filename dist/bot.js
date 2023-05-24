@@ -1,5 +1,5 @@
 "use strict";
-// src/Bot.ts
+// discord-bot/src/Bot.ts
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,6 +36,9 @@ const bot = new discord_js_1.Client({
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.get('/', (req, res) => {
+    res.send('Hello from Ferrum Authenticator!');
+});
 app.post('/authenticate', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { code, userAddress } = req.body;
     try {
@@ -76,31 +79,29 @@ app.post('/authenticate', (req, res) => __awaiter(void 0, void 0, void 0, functi
         try {
             const response = yield axios_1.default.get(`${API_URL_SNAP_HODL}/getSnapShotBySnapShotIdAndAddress/${SNAP_SHOT_ID}/${userAddress}`);
             const snapShotBalance = parseFloat(response.data.snapShotBalance);
-            console.log(`Snapshot balance: ${snapShotBalance}`); // New line
-            if (snapShotBalance > 0 && snapShotBalance < 450000) {
-                if (roleFrmHolder && roleQualifiedVoter && member) {
-                    yield member.roles.add(roleFrmHolder);
-                    yield member.roles.add(roleQualifiedVoter);
-                    yield channel.send(`${user} has been assigned the ${roleFrmHolder.name} & ${roleQualifiedVoter.name} roles`);
-                }
-                else {
-                    yield channel.send(`Error: User ${user} not found or role "FRM Holder" not found.`);
-                }
+            console.log(`Snapshot balance: ${snapShotBalance}`);
+            let rolesToAdd = [];
+            let roleNames = '';
+            if (snapShotBalance > 0 && snapShotBalance < 420000) {
+                rolesToAdd = [roleFrmHolder, roleQualifiedVoter].filter(role => role !== undefined);
+                roleNames = rolesToAdd.map(role => role.name).join(" & ");
+            }
+            else if (snapShotBalance >= 420000 && snapShotBalance < 450000) {
+                rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter].filter(role => role !== undefined);
+                roleNames = rolesToAdd.map(role => role.name).join(", ");
             }
             else if (snapShotBalance >= 450000) {
-                if (roleFrmHolder && roleGovernanceComittee && roleQualifiedVoter && roleQualifiedVoterProposalCreator && member) {
-                    yield member.roles.add(roleFrmHolder);
-                    yield member.roles.add(roleGovernanceComittee);
-                    yield member.roles.add(roleQualifiedVoter);
-                    yield member.roles.add(roleQualifiedVoterProposalCreator);
-                    yield channel.send(`${user} has been assigned the ${roleFrmHolder.name}, ${roleGovernanceComittee.name}, ${roleQualifiedVoter}, & ${roleQualifiedVoterProposalCreator.name} roles.`);
+                rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter, roleQualifiedVoterProposalCreator].filter(role => role !== undefined);
+                roleNames = rolesToAdd.map(role => role.name).join(", ");
+            }
+            if (rolesToAdd.length > 0 && member) {
+                for (const role of rolesToAdd) {
+                    yield member.roles.add(role);
                 }
-                else {
-                    yield channel.send(`Error: User ${user} not found or role "FRM Holder" not found.`);
-                }
+                yield channel.send(`${user} has been assigned the ${roleNames} roles.`);
             }
             else {
-                yield channel.send(`User ${user} snapshot balance is zero.`);
+                yield channel.send(`Error: User ${user} not found or role "FRM Holder" not found.`);
             }
         }
         catch (error) {
