@@ -83,9 +83,12 @@ app.post('/authenticate', async (req, res) => {
             let rolesToAdd: Role[] = [];
             let roleNames = '';
 
-            if (snapShotBalance > 0 && snapShotBalance < 450000) {
+            if (snapShotBalance > 0 && snapShotBalance < 420000) {
                 rolesToAdd = [roleFrmHolder, roleQualifiedVoter].filter(role => role !== undefined) as Role[];
                 roleNames = rolesToAdd.map(role => role.name).join(" & ");
+            } else if (snapShotBalance >= 420000 && snapShotBalance < 450000) {
+                rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter].filter(role => role !== undefined) as Role[];
+                roleNames = rolesToAdd.map(role => role.name).join(", ");
             } else if (snapShotBalance >= 450000) {
                 rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter, roleQualifiedVoterProposalCreator].filter(role => role !== undefined) as Role[];
                 roleNames = rolesToAdd.map(role => role.name).join(", ");
