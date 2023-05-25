@@ -1,4 +1,4 @@
-// discord-bot/src/Bot.ts
+// src/bot.ts
 
 import dotenv from 'dotenv';
 import { Client, Intents, Message, Role, TextChannel, ButtonInteraction, MessageActionRow, MessageButton } from "discord.js";
@@ -21,14 +21,28 @@ const DISCORD_SERVER_GUILD_BOT_CHANNEL_ID = process.env.DISCORD_SERVER_GUILD_BOT
 
 console.log("Bot is starting...");
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',')!;
+
+const app = express();
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    },
+    optionsSuccessStatus: 200
+}));
+
+app.use(express.json());
+
 const bot = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]
 });
 
-const app = express();
 
-app.use(cors());
-app.use(express.json());
 
 app.get('/', (req, res) => {
     res.send('Hello from Ferrum Authenticator!');
