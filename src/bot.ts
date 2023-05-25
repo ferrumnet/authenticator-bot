@@ -5,6 +5,8 @@ import { Client, Intents, Message, Role, TextChannel, ButtonInteraction, Message
 import axios from 'axios';
 import express from 'express';
 import cors from 'cors';
+import BigNumber from 'bignumber.js';
+
 
 dotenv.config();
 
@@ -95,19 +97,20 @@ app.post('/authenticate', async (req, res) => {
         // TODO: Continue with your existing logic
         try {
             const response = await axios.get(`${API_URL_SNAP_HODL}/getSnapShotBySnapShotIdAndAddress/${SNAP_SHOT_ID}/${userAddress}`);
-            const snapShotBalance = parseFloat(response.data.snapShotBalance);
-            console.log(`Snapshot balance: ${snapShotBalance}`);
+            const snapShotAddress = response.data.address as string;
+            const snapShotBalance = new BigNumber(response.data.snapShotBalance);
+            console.log(`Snapshot balance for ${snapShotAddress}: ${snapShotBalance.toString()}`);
 
             let rolesToAdd: Role[] = [];
             let roleNames = '';
 
-            if (snapShotBalance > 0 && snapShotBalance < 420000) {
+            if (snapShotBalance.isGreaterThan(0) && snapShotBalance.isLessThan(420000)) {
                 rolesToAdd = [roleFrmHolder, roleQualifiedVoter].filter(role => role !== undefined) as Role[];
                 roleNames = rolesToAdd.map(role => role.name).join(" & ");
-            } else if (snapShotBalance >= 420000 && snapShotBalance < 450000) {
+            } else if (snapShotBalance.isGreaterThanOrEqualTo(420000) && snapShotBalance.isLessThan(450000)) {
                 rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter].filter(role => role !== undefined) as Role[];
                 roleNames = rolesToAdd.map(role => role.name).join(", ");
-            } else if (snapShotBalance >= 450000) {
+            } else if (snapShotBalance.isGreaterThanOrEqualTo(450000)) {
                 rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter, roleQualifiedVoterProposalCreator].filter(role => role !== undefined) as Role[];
                 roleNames = rolesToAdd.map(role => role.name).join(", ");
             }

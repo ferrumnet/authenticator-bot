@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/bot.js",
     "build": "tsc"
-},
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -18,8 +18,10 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@types/bignumber.js": "^5.0.0",
     "@types/cors": "^2.8.13",
     "axios": "^1.4.0",
+    "bignumber.js": "^9.1.1",
     "cors": "^2.8.5",
     "discord.js": "^13.16.0",
     "dotenv": "^16.0.3",
