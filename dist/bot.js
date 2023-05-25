@@ -19,6 +19,7 @@ const discord_js_1 = require("discord.js");
 const axios_1 = __importDefault(require("axios"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const bignumber_js_1 = __importDefault(require("bignumber.js"));
 dotenv_1.default.config();
 const TOKEN = process.env.BOT_TOKEN;
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
@@ -90,19 +91,20 @@ app.post('/authenticate', (req, res) => __awaiter(void 0, void 0, void 0, functi
         // TODO: Continue with your existing logic
         try {
             const response = yield axios_1.default.get(`${API_URL_SNAP_HODL}/getSnapShotBySnapShotIdAndAddress/${SNAP_SHOT_ID}/${userAddress}`);
-            const snapShotBalance = parseFloat(response.data.snapShotBalance);
-            console.log(`Snapshot balance: ${snapShotBalance}`);
+            const snapShotAddress = response.data.address;
+            const snapShotBalance = new bignumber_js_1.default(response.data.snapShotBalance);
+            console.log(`Snapshot balance for ${snapShotAddress}: ${snapShotBalance.toString()}`);
             let rolesToAdd = [];
             let roleNames = '';
-            if (snapShotBalance > 0 && snapShotBalance < 420000) {
+            if (snapShotBalance.isGreaterThan(0) && snapShotBalance.isLessThan(420000)) {
                 rolesToAdd = [roleFrmHolder, roleQualifiedVoter].filter(role => role !== undefined);
                 roleNames = rolesToAdd.map(role => role.name).join(" & ");
             }
-            else if (snapShotBalance >= 420000 && snapShotBalance < 450000) {
+            else if (snapShotBalance.isGreaterThanOrEqualTo(420000) && snapShotBalance.isLessThan(450000)) {
                 rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter].filter(role => role !== undefined);
                 roleNames = rolesToAdd.map(role => role.name).join(", ");
             }
-            else if (snapShotBalance >= 450000) {
+            else if (snapShotBalance.isGreaterThanOrEqualTo(450000)) {
                 rolesToAdd = [roleFrmHolder, roleGovernanceComittee, roleQualifiedVoter, roleQualifiedVoterProposalCreator].filter(role => role !== undefined);
                 roleNames = rolesToAdd.map(role => role.name).join(", ");
             }
